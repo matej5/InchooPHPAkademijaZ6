@@ -32,7 +32,7 @@ class Post
     {
         $list = [];
         $db = Db::connect();
-        $statement = $db->prepare("select * from post");
+        $statement = $db->prepare("select * from post order bz dateCreated desc;");
         $statement->execute();
         foreach ($statement->fetchAll() as $post) {
             $list[] = new Post($post->id, $post->content);

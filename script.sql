@@ -4,8 +4,18 @@ use social_network;
 
 create table post(
 id int not null primary key auto_increment,
+dateCreated timestamp not null default current_timestamp,
 content text,
 image text
 )engine=InnoDB;
 
-insert into post (content) values ('Evo danas pada kiša opet :('), ('Jedem jagode.');
+
+create table comment(
+id int not null primary key auto_increment,
+postId int not null,
+dateCreated timestamp not null default current_timestamp,
+content text,
+foreign key (postId) references post(id)
+)engine=InnoDB;
+
+insert into post (content, image) values ('Evo danas pada kiša opet :(', 'Rain.jpg'), ('Jedem jagode.', 'Strawberry.jpg');
