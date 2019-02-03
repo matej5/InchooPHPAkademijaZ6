@@ -8,8 +8,13 @@
 
 <?php foreach ($posts as $post): ?>
     <p>
+        <?php $date = date_create($post->getDateCreated()); echo $date->format('d-m-Y H:i') ?>
         <a href="<?php echo App::config('url') ?>Index/view/<?= $post->getId() ?> ">
             <?= htmlspecialchars($post->getContent()) ?>
         </a>
     </p>
+    <?php if(!empty($post->getImage())){ ?>
+    <img src="app/images/<?= $post->getImage() ?>" height="50" width="50">
+        <?php } ?>
+<hr>
 <?php endforeach; ?>
