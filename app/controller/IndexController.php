@@ -14,9 +14,11 @@ class IndexController
     {
         $view = new View();
         $view->render('view', [
-            "post" => Post::find($id)
+            "post" => Post::find($id),
+            "comments" => Comment::all($id)
         ]);
     }
+
     public function newPost()
     {
         $data = $this->_validate($_POST);
@@ -29,6 +31,22 @@ class IndexController
             $stmt->bindValue('content', $data['content']);
             $stmt->execute();
             header('Location: ' . App::config('url'));
+        }
+    }
+
+    public function newComment($postId)
+    {
+        $data = $this->_validate($_POST);
+        if ($data === false) {
+            header('Location: ' . App::config('url'));
+        } else {
+            $connection = Db::connect();
+            $sql = 'INSERT INTO comment (content, postId) VALUES (:content, :postId)';
+            $stmt = $connection->prepare($sql);
+            $stmt->bindValue('content', $data['content']);
+            $stmt->bindValue('postId', $postId);
+            $stmt->execute();
+            header('Location: ' . App::config('url') . 'Index/view/' . $postId);
         }
     }
     /**

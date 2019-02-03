@@ -6,13 +6,17 @@ class Post
     private $content;
     private $dateCreated;
     private $image;
+    private $comments;
 
-    public function __construct($id, $content, $image, $dateCreated)
+    public function __construct($id, $content, $image, $dateCreated, $comments)
     {
         $this->setId($id);
         $this->setContent($content);
         $this->setImage($image);
-        $this->setDateCreated($dateCreated);
+        $date = date_create($dateCreated);
+        $date->format('d.m.Y. H:i');
+        $this->setDateCreated($date);
+        $this->setComments($comments);
     }
     public function __set($name, $value)
     {
@@ -37,10 +41,12 @@ class Post
     {
         $list = [];
         $db = Db::connect();
-        $statement = $db->prepare("select * from post order by dateCreated desc;");
+        $statement = $db->prepare("SELECT Post.*, count(Comment.Id) as comments
+                                            FROM comment Comment right join post Post 
+                                            on Comment.postId = Post.id group by Post.id order by Post.dateCreated desc;");
         $statement->execute();
         foreach ($statement->fetchAll() as $post) {
-            $list[] = new Post($post->id, $post->content, $post->image, $post->dateCreated);
+            $list[] = new Post($post->id, $post->content, $post->image, $post->dateCreated, $post->comments);
         }
         return $list;
     }
@@ -48,10 +54,12 @@ class Post
     {
         $id = intval($id);
         $db = Db::connect();
-        $statement = $db->prepare("select * from post where id = :id");
+        $statement = $db->prepare("SELECT Post.*, Comment.*
+                                            FROM comment Comment right join post Post 
+                                            on Comment.postId = Post.id group by Post.id where id = :id;");
         $statement->bindValue('id', $id);
         $statement->execute();
         $post = $statement->fetch();
-        return new Post($post->id, $post->content, $post->image, $post->dateCreated);
+        return new Post($post->id, $post->content, $post->image, $post->dateCreated, $post->comments);
     }
 }
