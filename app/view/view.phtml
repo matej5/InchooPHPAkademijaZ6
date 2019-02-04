@@ -1,11 +1,19 @@
 <p><?= $post->getDateCreated()->format('d.m.Y. H:i') ?> </p>
 <p><?= htmlspecialchars($post->getContent()) ?></p>
-<img src="<?php echo App::config('url') ?>app/images/<?= $post->getImage() ?>" height="50" width="50">
+<img src="<?php echo App::config('url') ?>app/images/<?= $post->getImage() ?>">
+
+<form action="<?php echo App::config('url') ?>Index/uploadImage/<?= $post->getId() ?>" method="post" enctype="multipart/form-data">
+    Select image to upload:
+    <input type="file" name="fileToUpload" id="fileToUpload">
+    <input type="submit" value="Upload Image" name="submit">
+</form>
+
 <h3>Comments</h3>
-<?php foreach ($comments as $comment){ ?>
-<p><?= $comment->getContent(); ?></p>
-<?php } ?>
-<form method="post" action="<?php echo App::config('url') ?>Index/newComment/<?= $post->getId()?>">
+<?php foreach ($comments as $comment): ?>
+    <p><?= $comment->getContent(); ?></p>
+    <hr>
+<?php endforeach; ?>
+<form method="post" action="<?php echo App::config('url') ?>Index/newComment/<?= $post->getId() ?>">
     <div class="form-group">
         <label for="content">What's on your mind?</label>
         <input id="content" name="content">

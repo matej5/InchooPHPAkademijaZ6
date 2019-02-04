@@ -67,4 +67,20 @@ class IndexController
         }
         return $data;
     }
+
+    public static function uploadImage($id)
+    {
+        $target_dir = "app/images/";
+        $name = basename($_FILES["fileToUpload"]["name"]);
+        $target_file = $target_dir . $name;
+
+        if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
+            $id = intval($id);
+            $db = Db::connect();
+            $statement = $db->prepare("update post set image = :image where id = :id;");
+            $statement->bindValue('id', $id);
+            $statement->bindValue('image', $name);
+            $statement->execute();
+        }
+    }
 }

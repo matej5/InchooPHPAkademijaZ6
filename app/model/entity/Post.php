@@ -16,14 +16,17 @@ class Post
         $date->format('d.m.Y. H:i');
         $this->setDateCreated($date);
     }
+
     public function __set($name, $value)
     {
         $this->$name = $value;
     }
+
     public function __get($name)
     {
         return isset($this->$name) ? $this->$name : null;
     }
+
     public function __call($name, $arguments)
     {
         $function = substr($name, 0, 3);
@@ -35,6 +38,7 @@ class Post
         }
         return $this;
     }
+
     public static function all()
     {
         $list = [];
@@ -46,6 +50,7 @@ class Post
         }
         return $list;
     }
+
     public static function find($id)
     {
         $id = intval($id);

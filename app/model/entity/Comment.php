@@ -39,7 +39,7 @@ class Comment
         $list = [];
         $id = intval($id);
         $db = Db::connect();
-        $statement = $db->prepare("SELECT * FROM comment where postId = :id;");
+        $statement = $db->prepare("SELECT * FROM comment where postId = :id order by dateCreated desc;");
         $statement->bindValue('id', $id);
         $statement->execute();
         foreach ($statement->fetchAll() as $comment) {
