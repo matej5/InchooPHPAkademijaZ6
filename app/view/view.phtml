@@ -1,5 +1,5 @@
 <p><?= $post->getDateCreated()->format('d.m.Y. H:i') ?> </p>
-<p><?= htmlspecialchars($post->getContent()) ?></p>
+<h1><?= htmlspecialchars($post->getContent()) ?></h1>
 <img src="<?php echo App::config('url') ?>app/images/<?= $post->getImage() ?>">
 
 <form action="<?php echo App::config('url') ?>Index/uploadImage/<?= $post->getId() ?>" method="post" enctype="multipart/form-data">

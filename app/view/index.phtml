@@ -15,7 +15,7 @@
         num of comments: <?= Comment::count($post->getId()); ?>
     </p>
     <?php if(!empty($post->getImage())){ ?>
-    <img src="app/images/<?= $post->getImage() ?>" height="50" width="50">
+    <img src="app/images/<?= $post->getImage() ?>" height="60" width="60">
         <?php } ?>
 <hr>
 <?php endforeach; ?>
