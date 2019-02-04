@@ -1,21 +1,38 @@
+<h3>What's on your mind?</h3>
 <form method="post" action="<?php echo App::config('url') ?>Index/newPost">
-    <div class="form-group">
-        <label for="content">What's on your mind?</label>
-        <input id="content" name="content">
+    <div class="input-group input-group-rounded">
+        <input class="input-group-field" id="content" name="content">
+        <div class="input-group-button">
+            <button type="submit" class="button secondary">Save</button>
+        </div>
     </div>
-    <button type="submit" class="btn btn-primary">Save</button>
 </form>
 
-<?php foreach ($posts as $post): ?>
-    <p>
-        <?php echo $post->getDateCreated()->format('d.m.Y. H:i') ?>
-        <a href="<?= App::config('url') ?>Index/view/<?= $post->getId() ?> ">
-            <?= htmlspecialchars($post->getContent()) ?>
-        </a>
-        num of comments: <?= Comment::count($post->getId()); ?>
-    </p>
-    <?php if(!empty($post->getImage())){ ?>
-    <img src="app/images/<?= $post->getImage() ?>" height="60" width="60">
+<table class="table-expand">
+    <thead>
+    <tr class="table-expand-row">
+        <th width="200">Date</th>
+        <th>Content</th>
+        <th class="text-right" width="150">Number of comments</th>
+        <th width="150">Image</th>
+    </tr>
+    </thead>
+    <tbody>
+    <?php foreach ($posts as $post): ?>
+    <tr class="table-expand-row" data-open-details>
+        <td><?php echo $post->getDateCreated()->format('d.m.Y. H:i') ?></td>
+        <td><a href="<?= App::config('url') ?>Index/view/<?= $post->getId() ?> ">
+                <?= htmlspecialchars($post->getContent()) ?>
+            </a>
+        </td>
+
+        <td>num of comments: <?= Comment::count($post->getId()); ?></td>
+        <td>
+        <?php if(!empty($post->getImage())){ ?>
+            <img src="app/images/<?= $post->getImage() ?>" height="60" width="60">
         <?php } ?>
-<hr>
-<?php endforeach; ?>
+        </td>
+    </tr>
+    <?php endforeach; ?>
+    </tbody>
+</table>
