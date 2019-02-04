@@ -43,8 +43,19 @@ class Comment
         $statement->bindValue('id', $id);
         $statement->execute();
         foreach ($statement->fetchAll() as $comment) {
-            $list[] = new Post($comment->id, $comment->content,$comment->dateCreated);
+            $list[] = new Comment($comment->id, $comment->content, $comment->dateCreated);
         }
         return $list;
+    }
+
+    public static function count($id)
+    {
+        $id = intval($id);
+        $db = Db::connect();
+        $statement = $db->prepare("SELECT count(*) as total from comment where postId = :id;");
+        $statement->bindValue('id', $id);
+        $statement->execute();
+        $comments = $statement->fetch();
+        return $comments->total;
     }
 }

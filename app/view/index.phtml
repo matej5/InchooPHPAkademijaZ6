@@ -12,7 +12,7 @@
         <a href="<?= App::config('url') ?>Index/view/<?= $post->getId() ?> ">
             <?= htmlspecialchars($post->getContent()) ?>
         </a>
-        num of comments: <?= $post->getComments(); ?>
+        num of comments: <?= Comment::count($post->getId()); ?>
     </p>
     <?php if(!empty($post->getImage())){ ?>
     <img src="app/images/<?= $post->getImage() ?>" height="50" width="50">

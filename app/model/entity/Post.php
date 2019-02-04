@@ -6,9 +6,8 @@ class Post
     private $content;
     private $dateCreated;
     private $image;
-    private $comments;
 
-    public function __construct($id, $content, $image, $dateCreated, $comments)
+    public function __construct($id, $content, $image, $dateCreated)
     {
         $this->setId($id);
         $this->setContent($content);
@@ -16,7 +15,6 @@ class Post
         $date = date_create($dateCreated);
         $date->format('d.m.Y. H:i');
         $this->setDateCreated($date);
-        $this->setComments($comments);
     }
     public function __set($name, $value)
     {
@@ -41,12 +39,10 @@ class Post
     {
         $list = [];
         $db = Db::connect();
-        $statement = $db->prepare("SELECT Post.*, count(Comment.Id) as comments
-                                            FROM comment Comment right join post Post 
-                                            on Comment.postId = Post.id group by Post.id order by Post.dateCreated desc;");
+        $statement = $db->prepare("SELECT * from post order by dateCreated desc;");
         $statement->execute();
         foreach ($statement->fetchAll() as $post) {
-            $list[] = new Post($post->id, $post->content, $post->image, $post->dateCreated, $post->comments);
+            $list[] = new Post($post->id, $post->content, $post->image, $post->dateCreated);
         }
         return $list;
     }
@@ -54,12 +50,10 @@ class Post
     {
         $id = intval($id);
         $db = Db::connect();
-        $statement = $db->prepare("SELECT Post.*, Comment.*
-                                            FROM comment Comment right join post Post 
-                                            on Comment.postId = Post.id group by Post.id where id = :id;");
+        $statement = $db->prepare("SELECT * from post where id = :id;");
         $statement->bindValue('id', $id);
         $statement->execute();
         $post = $statement->fetch();
-        return new Post($post->id, $post->content, $post->image, $post->dateCreated, $post->comments);
+        return new Post($post->id, $post->content, $post->image, $post->dateCreated);
     }
 }
