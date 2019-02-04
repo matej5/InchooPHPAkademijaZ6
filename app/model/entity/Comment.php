@@ -11,7 +11,8 @@ class Comment
         $this->setId($id);
         $this->setContent($content);
         $date = date_create($dateCreated);
-        $date->format('d.m.Y. H:i');
+        date_timezone_set($date, timezone_open('Europe/Zagreb'));
+        $date = date_format($date, 'd.m.Y. H:i');
         $this->setDateCreated($date);
     }
     public function __set($name, $value)

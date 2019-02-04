@@ -1,22 +1,42 @@
-<p><?= $post->getDateCreated()->format('d.m.Y. H:i') ?> </p>
-<h1><?= htmlspecialchars($post->getContent()) ?></h1>
-<img src="<?php echo App::config('url') ?>app/images/<?= $post->getImage() ?>">
+<div class="post">
+    <?php if(!empty( $post->getImage() )){ ?>
+    <div class="image">
+        <img src="<?php echo App::config('url') ?>app/images/<?= $post->getImage() ?>" alt="" />
+    </div>
+    <?php } ?>
+    <div class="content">
+        <h3><?= $post->getDateCreated() ?></h3>
+        <p><?= htmlspecialchars($post->getContent()) ?></p>
 
-<form action="<?php echo App::config('url') ?>Index/uploadImage/<?= $post->getId() ?>" method="post" enctype="multipart/form-data">
-    Select image to upload:
-    <input type="file" name="fileToUpload" id="fileToUpload">
-    <input type="submit" value="Upload Image" name="submit">
-</form>
+        <form action="<?php echo App::config('url') ?>Index/uploadImage/<?= $post->getId() ?>" method="post" enctype="multipart/form-data">
+            <div>
+                <h4>Select image to upload:</h4>
+                <input type="file" name="fileToUpload" id="fileToUpload">
+                <input type="submit" value="Upload Image" name="submit">
+            </div>
+        </form>
+        <form action="<?php echo App::config('url') ?>Index/deletePost/<?= $post->getId() ?>" method="post" enctype="multipart/form-data">
+            <div>
+                <input type="submit" value="Delete Post" name="submit">
+            </div>
+        </form>
+    </div>
+</div>
 
 <h3>Comments</h3>
-<?php foreach ($comments as $comment): ?>
-    <p><?= $comment->getContent(); ?></p>
-    <hr>
-<?php endforeach; ?>
-<form method="post" action="<?php echo App::config('url') ?>Index/newComment/<?= $post->getId() ?>">
-    <div class="form-group">
-        <label for="content">What's on your mind?</label>
-        <input id="content" name="content">
-    </div>
-    <button type="submit" class="btn btn-primary">Save</button>
-</form>
+<table class="table-expand">
+    <thead>
+    <tr class="table-expand-row">
+        <th width="200">Date</th>
+        <th>Content</th>
+    </tr>
+    </thead>
+    <tbody>
+    <?php foreach ($comments as $comment): ?>
+        <tr class="table-expand-row" data-open-details>
+            <td><?= $comment->getDateCreated()?></td>
+            <td><?= htmlspecialchars($comment->getContent()) ?></td>
+        </tr>
+    <?php endforeach; ?>
+    </tbody>
+</table>

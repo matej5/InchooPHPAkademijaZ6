@@ -10,6 +10,7 @@ class IndexController
             "posts" => $posts
         ]);
     }
+
     public function view($id = 0)
     {
         $view = new View();
@@ -33,6 +34,18 @@ class IndexController
             header('Location: ' . App::config('url'));
         }
     }
+
+    public function deletePost($id)
+    {
+        $connection = Db::connect();
+        $sql = 'delete from comment where postId = :id;
+                delete from post where id = :id;';
+        $stmt = $connection->prepare($sql);
+        $stmt->bindValue('id', $id);
+        $stmt->execute();
+        header('Location: ' . App::config('url'));
+    }
+
 
     public function newComment($postId)
     {
@@ -82,5 +95,6 @@ class IndexController
             $statement->bindValue('image', $name);
             $statement->execute();
         }
+        header('Location: ' . App::config('url'));
     }
 }

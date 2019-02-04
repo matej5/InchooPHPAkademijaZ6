@@ -11,7 +11,6 @@ set_include_path(implode(PATH_SEPARATOR, array(
 )));
 
 spl_autoload_register(function ($class) {
-
     $classPath = strtr($class, '\\', DIRECTORY_SEPARATOR) . '.php';
     if($file = stream_resolve_include_path($classPath)){
         include $file;
