@@ -1,15 +1,17 @@
 <?php
-
 class Comment
 {
     private $id;
     private $content;
+    private $post;
+    private $comment;
     private $dateCreated;
-
-    public function __construct($id, $content, $dateCreated)
+    public function __construct($id, $content, $post, $comment, $dateCreated)
     {
         $this->setId($id);
         $this->setContent($content);
+        $this->setPost($post);
+        $this->setComment($comment);
         $date = date_create($dateCreated);
         date_timezone_set($date, timezone_open('Europe/Zagreb'));
         $date = date_format($date, 'd.m.Y. H:i');
@@ -34,7 +36,6 @@ class Comment
         }
         return $this;
     }
-
     public static function all($id)
     {
         $list = [];
@@ -44,11 +45,10 @@ class Comment
         $statement->bindValue('id', $id);
         $statement->execute();
         foreach ($statement->fetchAll() as $comment) {
-            $list[] = new Comment($comment->id, $comment->content, $comment->dateCreated);
+            $list[] = new Comment($comment->id, $comment->content, $comment->post, $comment->comment, $comment->dateCreated);
         }
         return $list;
     }
-
     public static function count($id)
     {
         $id = intval($id);

@@ -3,19 +3,31 @@
 class Post
 {
     private $id;
-    private $content;
-    private $dateCreated;
-    private $image;
 
-    public function __construct($id, $content, $image, $dateCreated)
+    private $content;
+
+    private $user;
+
+    private $date;
+
+    private $likes;
+
+    private $comments;
+
+    private $userid;
+
+    public function __construct($id, $content, $user, $date, $likes, $comments, $userid)
     {
         $this->setId($id);
         $this->setContent($content);
-        $this->setImage($image);
-        $date = date_create($dateCreated);
-        date_timezone_set($date, timezone_open('Europe/Zagreb'));
-        $date = date_format($date, 'd.m.Y. H:i');
-        $this->setDateCreated($date);
+        $this->setUser($user);
+        $d = date_create($date);
+        date_timezone_set($d, timezone_open('Europe/Zagreb'));
+        $d = date_format($d, 'd.m.Y. H:i');
+        $this->setDate($d);
+        $this->setLikes($likes);
+        $this->setComments($comments);
+        $this->setUserid($userid);
     }
 
     public function __set($name, $value)
@@ -37,6 +49,7 @@ class Post
         } else if ($function === 'get') {
             return $this->__get(strtolower(substr($name, 3)));
         }
+
         return $this;
     }
 
@@ -44,22 +57,98 @@ class Post
     {
         $list = [];
         $db = Db::connect();
-        $statement = $db->prepare("SELECT * from post order by dateCreated desc;");
+        $statement = $db->prepare("select 
+        a.id, a.content, concat(b.firstname, ' ', b.lastname) as user, a.date, 
+        count(c.id) as likes
+        from 
+        post a inner join user b on a.user=b.id 
+        left join likes c on a.id=c.post 
+        where a.date > ADDDATE(now(), INTERVAL -7 DAY) 
+        group by a.id, a.content, concat(b.firstname, ' ', b.lastname), a.date 
+        order by a.date desc limit 10");
         $statement->execute();
         foreach ($statement->fetchAll() as $post) {
-            $list[] = new Post($post->id, $post->content, $post->image, $post->dateCreated);
+
+            $statement = $db->prepare("select a.id, a.content, concat(b.firstname, ' ', b.lastname) as user, a.date from comment a inner join user b on a.user=b.id where a.postId=:id ");
+            $statement->bindValue('id', $post->id);
+            $statement->execute();
+            $comments = $statement->fetchAll();
+
+
+            $list[] = new Post($post->id, $post->content, $post->user, $post->date, $post->likes, $comments, 0);
         }
+
         return $list;
     }
+
+    /**
+     * @param $str
+     * @return string|string[]|null
+     */
+    public static function convertHashtags($str)
+    {
+        $replace="/#+[a-zAZ0-9]+/";
+        $str = preg_replace($replace, '<a href="#">$0</a>',$str);
+        return $str;
+    }
+
+    public static function allinone()
+    {
+
+        $time = microtime(true);
+        $list = [];
+        $db = Db::connect();
+        $statement = $db->prepare("select 
+        a.id, a.content, concat(b.firstname, ' ', b.lastname) as user, a.date,
+        d.id as commentid, d.content as commentcontent ,
+        concat(e.firstname, ' ', e.lastname) as commentuser,
+        count(c.id) as likes
+        from 
+        post a inner join user b on a.user=b.id 
+        left join likes c on a.id=c.post 
+        inner join comment d on a.id=d.post
+        inner join user e on d.user=e.id
+        where a.date > ADDDATE(now(), INTERVAL -7 DAY) 
+        group by a.id, a.content, concat(b.firstname, ' ', b.lastname), a.date ,
+        d.id , d.content  ,
+        concat(e.firstname, ' ', e.lastname) 
+        order by a.date desc limit 100");
+        $statement->execute();
+        //todo završiti
+        foreach ($statement->fetchAll() as $post) {
+
+
+            $list[] = new Post($post->id, $post->content, $post->user, $post->date, $post->likes, [], 0);
+        }
+        $time2 = microtime(true);
+        echo $time2 - $time;
+
+        return $list;
+    }
+
 
     public static function find($id)
     {
         $id = intval($id);
         $db = Db::connect();
-        $statement = $db->prepare("SELECT * from post where id = :id;");
+        $statement = $db->prepare("select 
+        a.id, a.content, concat(b.firstname, ' ', b.lastname) as user, a.date, a.user as userid, count(c.id) as likes
+        from 
+        post a inner join user b on a.user=b.id 
+        left join likes c on a.id=c.post 
+         where a.id=:id");
         $statement->bindValue('id', $id);
         $statement->execute();
         $post = $statement->fetch();
-        return new Post($post->id, $post->content, $post->image, $post->dateCreated);
+
+        $statement = $db->prepare("select a.id, a.content, concat(b.firstname, ' ', b.lastname) as user, a.date from comment a inner join user b on a.user=b.id where a.postId=:id ");
+        $statement->bindValue('id', $id);
+        $statement->execute();
+        $comments = $statement->fetchAll();
+
+
+        $post->content = Post::convertHashtags($post->content);
+
+        return new Post($post->id, $post->content, $post->user, $post->date, $post->likes, $comments, $post->userid);
     }
 }
