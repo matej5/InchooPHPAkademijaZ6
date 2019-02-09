@@ -4,8 +4,9 @@
 <?php endif; ?>
 
 <cite><?= htmlspecialchars($post->getUser()) ?></cite>  <?php echo $post->date ?>
-<p><?= $post->getContent() ?></p> Likes: <?php echo $post->getLikes() ?>
+<h3><?= $post->getContent() ?></h3> Likes: <?php echo $post->getLikes() ?>
 
+<hr>
 
 <h3>Comments</h3>
 <?php foreach ($post->getComments() as $comment): ?>
