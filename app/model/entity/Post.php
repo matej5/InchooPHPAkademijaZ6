@@ -114,10 +114,8 @@ class Post
         concat(e.firstname, ' ', e.lastname) 
         order by a.date desc limit 100");
         $statement->execute();
-        //todo završiti
+
         foreach ($statement->fetchAll() as $post) {
-
-
             $list[] = new Post($post->id, $post->content, $post->user, $post->date, $post->likes, [], 0);
         }
         $time2 = microtime(true);
@@ -125,7 +123,6 @@ class Post
 
         return $list;
     }
-
 
     public static function find($id)
     {

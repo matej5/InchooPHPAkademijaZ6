@@ -10,7 +10,7 @@ class User
 {
     public static function createAvatar($fn,$ln,$em)
     {
-        $siteRoot = BP.'app/images/';
+        $siteRoot = App::config('url').'app/images/';
 
         $newUserSubfolder = $siteRoot . $em;
         if (!file_exists($newUserSubfolder)) {

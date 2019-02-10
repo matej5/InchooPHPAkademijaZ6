@@ -10,24 +10,115 @@
 <div class="top-bar">
     <div class="top-bar-left">
         <ul class="dropdown menu" data-dropdown-menu>
-            <li class="menu-text">Inchoo PHP Academy 2019</li>
+            <?php if (Session::getInstance()->isLoggedIn()): ?>
+                <li class="menu-text"><?php echo Session::getInstance()->getUser()->name; ?></li>
+            <?php else: ?>
+                <li class="menu-text">Inchoo PHP Academy 2019</li>
+            <?php endif; ?>
             <li><a href="<?php echo App::config('url') ?>Index/index">Home</a></li>
             <?php if (!Session::getInstance()->isLoggedIn()): ?>
-                <a href="<?php echo App::config("url") . "admin/login" ?>">Login</a>
-                <a href="<?php echo App::config("url") . "admin/registration" ?>">Registration</a>
+                <a href="javascript:void(0);" data-open="loginModal1">Login</a>
+                <a href="javascript:void(0);" data-open="registerModal1">Registration</a>
             <?php else: ?>
-                <a href="<?php echo App::config("url") . "admin/logout" ?>">Logout <?php echo Session::getInstance()->getUser()->name ?></a>
+                <a href="<?php echo App::config("url") . "admin/profile" ?>">Profile</a>
             <?php endif; ?>
         </ul>
     </div>
     <div class="top-bar-right">
         <ul class="menu">
+            <?php if (Session::getInstance()->isLoggedIn()): ?>
+                <a href="<?php echo App::config("url") . "admin/logout" ?>">Logout</a>
+            <?php endif; ?>
             <li><input type="search" placeholder="Search"></li>
-            <li><button type="button" class="button">Search</button></li>
+            <li>
+                <button type="button" class="button">Search</button>
+            </li>
         </ul>
     </div>
 </div>
-    <?php echo $content ?>
+
+<div class="reveal" id="registerModal1" data-reveal>
+    <h1>Register</h1>
+    <form method="post" action="<?php echo App::config('url') ?>admin/register">
+
+        <div class="form-group">
+            <div class="grid-x grid-padding-x">
+                <div class="small-3 cell">
+                    <label for="middle-label" class="text-right middle">First name</label>
+                </div>
+                <div class="small-9 cell">
+                    <input type="text" name="firstname" id="middle-label" placeholder="First name">
+                </div>
+            </div>
+
+            <div class="grid-x grid-padding-x">
+                <div class="small-3 cell">
+                    <label for="middle-label" class="text-right middle">Last name</label>
+                </div>
+                <div class="small-9 cell">
+                    <input type="text" name="lastname" id="middle-label" placeholder="Last name">
+                </div>
+            </div>
+
+            <div class="grid-x grid-padding-x">
+                <div class="small-3 cell">
+                    <label for="middle-label" class="text-right middle">Email</label>
+                </div>
+                <div class="small-9 cell">
+                    <input type="email" name="email" id="middle-label" placeholder="Email">
+                </div>
+            </div>
+
+            <div class="grid-x grid-padding-x">
+                <div class="small-3 cell">
+                    <label for="middle-label" class="text-right middle">Password</label>
+                </div>
+                <div class="small-9 cell">
+                    <input type="password" name="password" id="middle-label" placeholder="Password">
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="button primary">Register</button>
+
+    </form>
+    <button class="close-button" data-close aria-label="Close modal" type="button">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<div class="reveal" id="loginModal1" data-reveal>
+    <h1>Login</h1>
+    <?php echo $message ?>
+    <form method="post" action="<?php echo App::config('url') ?>admin/authorize">
+
+        <div class="grid-x grid-padding-x">
+            <div class="small-3 cell">
+                <label for="middle-label" class="text-right middle">Email</label>
+            </div>
+            <div class="small-9 cell">
+                <input type="email" name="email" id="middle-label" placeholder="Email">
+            </div>
+        </div>
+
+        <div class="grid-x grid-padding-x">
+            <div class="small-3 cell">
+                <label for="middle-label" class="text-right middle">Password</label>
+            </div>
+            <div class="small-9 cell">
+                <input type="password" name="password" id="middle-label" placeholder="Password">
+            </div>
+        </div>
+
+        <button type="submit" class="button primary">Login</button>
+
+    </form>
+    <button class="close-button" data-close aria-label="Close modal" type="button">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<?php echo $content ?>
 
 <script src="/style/js/vendor/jquery.js"></script>
 <script src="/style/js/vendor/what-input.js"></script>

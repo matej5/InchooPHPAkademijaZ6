@@ -13,3 +13,11 @@
 
     right: 0px;
 }
+
+.indent{
+    margin-left: 20px;
+}
+
+.form-horizontal{
+    display:none
+}
