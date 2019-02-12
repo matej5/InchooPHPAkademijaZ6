@@ -16,7 +16,11 @@ class Post
 
     private $userid;
 
-    public function __construct($id, $content, $user, $date, $likes, $comments, $userid)
+    private $userEmail;
+
+    private $userImage;
+
+    public function __construct($id, $content, $user, $date, $likes, $comments, $userid, $userEmail, $userImage)
     {
         $this->setId($id);
         $this->setContent($content);
@@ -28,6 +32,8 @@ class Post
         $this->setLikes($likes);
         $this->setComments($comments);
         $this->setUserid($userid);
+        $this->setUserEmail($userEmail);
+        $this->setUserImage($userImage);
     }
 
     public function __set($name, $value)
@@ -59,7 +65,7 @@ class Post
         $db = Db::connect();
         $statement = $db->prepare("select 
         a.id, a.content, concat(b.firstname, ' ', b.lastname) as user, a.date, 
-        count(c.id) as likes
+        count(c.id) as likes, b.email, b.image
         from 
         post a inner join user b on a.user=b.id 
         left join likes c on a.id=c.post 
@@ -74,8 +80,7 @@ class Post
             $statement->execute();
             $comments = $statement->fetchAll();
 
-
-            $list[] = new Post($post->id, $post->content, $post->user, $post->date, $post->likes, $comments, 0);
+            $list[] = new Post($post->id, $post->content, $post->user, $post->date, $post->likes, $comments, 0, $post->email, $post->image);
         }
 
         return $list;
@@ -87,8 +92,8 @@ class Post
      */
     public static function convertHashtags($str)
     {
-        $replace="/#+[a-zAZ0-9]+/";
-        $str = preg_replace($replace, '<a href="#">$0</a>',$str);
+        $replace = "/#+[a-zAZ0-9]+/";
+        $str = preg_replace($replace, '<a href="#">$0</a>', $str);
         return $str;
     }
 
@@ -114,10 +119,8 @@ class Post
         concat(e.firstname, ' ', e.lastname) 
         order by a.date desc limit 100");
         $statement->execute();
-        //todo završiti
+
         foreach ($statement->fetchAll() as $post) {
-
-
             $list[] = new Post($post->id, $post->content, $post->user, $post->date, $post->likes, [], 0);
         }
         $time2 = microtime(true);
@@ -125,7 +128,6 @@ class Post
 
         return $list;
     }
-
 
     public static function find($id)
     {
@@ -150,5 +152,47 @@ class Post
         $post->content = Post::convertHashtags($post->content);
 
         return new Post($post->id, $post->content, $post->user, $post->date, $post->likes, $comments, $post->userid);
+    }
+
+    public static function countTime($date)
+    {
+        $time = strtotime($date);
+        $diff = time() - $time;
+        if ($diff < 60) {
+            return floor($diff) . 's ';
+        }
+        $diff /= 60;
+        if ($diff < 60) {
+            return floor($diff) . 'm ';
+        }
+        $diff /= 60;
+        if ($diff < 24) {
+            return floor($diff) . 'h ';
+        }
+        $diff /= 24;
+        if ($diff < 30) {
+            return floor($diff) . 'd ';
+        }
+        $diff /= 30;
+        if ($diff < 12) {
+            return (floor($diff) > 1) ? floor($diff) . ' months ' : floor($diff) . ' month ';
+        }
+        $diff /= 12.175;
+        return (floor($diff) > 1) ? floor($diff) . ' years ' : floor($diff) . ' year ';
+    }
+
+    public static function checkIfLiked($post)
+    {
+        $db = Db::connect();
+        $statement = $db->prepare("select post, user from likes where post = :post and user = :user");
+        $statement->bindValue('post', $post);
+        $statement->bindValue('user', Session::getInstance()->getUser()->id);
+        $statement->execute();
+
+        if($statement->rowCount() > 0){
+            return true;
+        }else {
+            return false;
+        }
     }
 }

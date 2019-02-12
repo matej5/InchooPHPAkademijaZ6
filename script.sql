@@ -1,6 +1,6 @@
-DROP DATABASE IF EXISTS social_network;
-CREATE DATABASE social_network CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-use social_network;
+DROP DATABASE IF EXISTS polaznik23_mvc;
+CREATE DATABASE polaznik23_mvc CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+use polaznik23_mvc;
 
 create table user(
 id int not null primary key auto_increment,

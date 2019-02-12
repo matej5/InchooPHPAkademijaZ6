@@ -7,7 +7,8 @@ class IndexController
         $view = new View();
         $posts = Post::all();
         $view->render('index', [
-            "posts" => $posts
+            "posts" => $posts,
+            "message" => ''
         ]);
     }
 
@@ -16,7 +17,8 @@ class IndexController
         $view = new View();
 
         $view->render('view', [
-            "post" => Post::find($id)
+            "post" => Post::find($id),
+            "message" => ''
         ]);
     }
 
