@@ -16,7 +16,6 @@ class AdminController
         User::createAvatar(Request::post('firstname'),Request::post('lastname'),Request::post('email'));
 
         Session::getInstance()->logout();
-
         $this->index();
 
     }
