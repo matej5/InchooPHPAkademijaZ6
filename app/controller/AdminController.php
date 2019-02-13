@@ -21,6 +21,23 @@ class AdminController
 
     }
 
+    public static function report($id)
+    {
+        if(!Session::getInstance()->isLoggedIn()){
+            header('Location: ' . App::config('url') . 'Index/index');
+        }elseif (Report::checkIfReported($id)) {
+            header('Location: ' . App::config('url') . 'Index/index');
+        }else {
+            $db = Db::connect();
+            $statement = $db->prepare("insert into report (user, post) values(:user, :post)");
+            $statement->bindValue('post', $id);
+            $statement->bindValue('user', Session::getInstance()->getUser()->id);
+            $statement->execute();
+
+            header('Location: ' . App::config('url') . 'Index/index');
+        }
+    }
+
     public function delete($post)
     {
 
@@ -28,6 +45,18 @@ class AdminController
         $db->beginTransaction();
         $statement = $db->prepare("SET foreign_key_checks = 0;
                                             delete from comment where postId=:post;
+                                            SET foreign_key_checks = 1;");
+        $statement->bindValue('post', $post);
+        $statement->execute();
+
+        $statement = $db->prepare("SET foreign_key_checks = 0;
+                                            delete from report where post=:post;
+                                            SET foreign_key_checks = 1;");
+        $statement->bindValue('post', $post);
+        $statement->execute();
+
+        $statement = $db->prepare("SET foreign_key_checks = 0;
+                                            delete from post_tag where post=:post;
                                             SET foreign_key_checks = 1;");
         $statement->bindValue('post', $post);
         $statement->execute();
@@ -57,6 +86,7 @@ class AdminController
         ]);
     }
 
+    //todo change pass
     public function changeData()
     {
         $db = Db::connect();
@@ -72,9 +102,15 @@ class AdminController
 
     public function uploadImage()
     {
+
         $target_dir = "app/images/".Session::getInstance()->getUser()->email."/";
         $name = basename($_FILES["fileToUpload"]["name"]);
         $target_file = $target_dir . $name;
+        $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
+        if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg" && $imageFileType != "gif" ) {
+            $this->profile();
+        }
+
         if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
             $db = Db::connect();
             $statement = $db->prepare("update user set image = :image where id = :id;");

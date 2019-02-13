@@ -1,14 +1,36 @@
-<?php if( Session::getInstance()->isLoggedIn() && ($post->getUserid()==Session::getInstance()->getUser()->id) || Session::getInstance()->getUser()->status == 1): ?>
-<a href="<?php echo App::config("url") ?>admin/delete/<?php echo $post->getId() ?>">Delete posts (and all likes and comments)</a><br />
+<?php if (Session::getInstance()->isLoggedIn()):
+    if ($post->getUserid() == Session::getInstance()->getUser()->id || Session::getInstance()->getUser()->status == 1): ?>
+        <a href="<?php echo App::config("url") ?>admin/delete/<?php echo $post->getId() ?>">Delete posts (and all likes
+            and
+            comments)</a><br/>
+    <?php endif;
+endif; ?>
+    <img src="/app/images/<?= $post->getImage() ?>" class="profileImage">
+    <b><?php echo htmlspecialchars($post->getUser()) ?></b>
+    <h3><?= htmlspecialchars($post->getContent()) ?> </h3> <br/>
+<?php if (Session::getInstance()->isLoggedIn()): ?>
+    <a href="<?php echo App::config('url') ?>admin/like/<?php echo $post->id ?>">Like</a>
+
+    <form method="post" action="<?= App::config('url') ?>admin/report/<?php echo $post->id ?>">
+        <input type="submit" name="submit" value="Report">
+    </form>
 <?php endif; ?>
+    <cite>
+        <?php echo 'Before ' . Post::countTime($post->date);
+        if ($post->getLikes() > 0) {
+            echo $post->getLikes();
+            ?>
+            <a href="javascript:void(0);" data-open="likeModal">
+                <?= ($post->getLikes() != 1) ? ' likes' : ' like'; ?>
+            </a>
+            <?php
+        }
+        ?>
+    </cite>
+    <hr>
 
-<cite><?= htmlspecialchars($post->getUser()) ?></cite>  <?php echo $post->date ?>
-<h3><?= $post->getContent() ?></h3> Likes: <?php echo $post->getLikes() ?>
-
-<hr>
-
-<h3>Comments</h3>
-<?php if( Session::getInstance()->isLoggedIn() ): ?>
+    <h3>Comments</h3>
+<?php if (Session::getInstance()->isLoggedIn()): ?>
 
     <form method="post" action="<?php echo App::config('url') ?>admin/comment/<?php echo $post->getId() ?>">
 

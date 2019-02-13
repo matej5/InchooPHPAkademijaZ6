@@ -1,78 +1,85 @@
 <h1>All Posts</h1>
 <?php if (Session::getInstance()->isLoggedIn()): ?>
     <h3>What's on your mind?</h3>
-    <form method="post" action="<?php echo App::config('url') ?>Index/newPost">
-        <div class="input-group input-group-rounded">
-            <input type="text" class="input-group-field" id="content" name="content">
-            <div class="input-group-button">
-                <button type="submit" class="button secondary">Save</button>
-            </div>
-        </div>
+    <form method="post" name="add_name" id="add_name" action="<?php echo App::config('url') ?>Index/newPost">
+        <table class="table table-bordered" id="dynamic_field">
+            <tr>
+                <td><input type="text" placeholder="Insert post" class="form-control name_list" id="content" name="content"></td>
+                <td><input type="text" placeholder="Insert tags separated by space" class="form-control name_list" id="tags" name="tags"></td>
+            </tr>
+        </table>
+        <input type="button" name="submit" id="submit" value="Save" class="button secondary">
     </form>
 <?php endif; ?>
 
 
 <?php foreach ($posts as $post): ?>
-    <p>
-    <img src="/app/images/<?= $post->getImage() ?>" class="postImage">
-    <b><?php echo htmlspecialchars($post->getUser()) ?></b>
-    <a href="<?php echo App::config('url') ?>Index/view/<?= $post->getId() ?> ">
-        <?= htmlspecialchars($post->getContent()) ?> </a> <br/>
+    <?php if (!Report::checkIfBanned($post->getId())): ?>
+        <p>
+        <img src="/app/images/<?= $post->getImage() ?>" class="postImage">
+        <b><?php echo htmlspecialchars($post->getUser()) ?></b>
+        <a href="<?php echo App::config('url') ?>Index/view/<?= $post->getId() ?> ">
+            <?= htmlspecialchars($post->getContent()) ?> </a> <br/>
 
-    <?php if (Session::getInstance()->isLoggedIn()): ?>
-        <a href="<?php echo App::config('url') ?>admin/like/<?php echo $post->id ?>">Like</a>
-    <?php endif; ?>
-    <cite>
-        <?php echo 'Before ' . Post::countTime($post->date);
-        if ($post->getLikes() > 0) {
-            echo $post->getLikes();
+        <?php if (Session::getInstance()->isLoggedIn()): ?>
+            <a href="<?php echo App::config('url') ?>admin/like/<?php echo $post->id ?>">Like</a>
+
+            <form method="post" action="<?= App::config('url') ?>admin/report/<?php echo $post->id ?>">
+                <input type="submit" name="submit" value="Report">
+            </form>
+        <?php endif; ?>
+        <cite>
+            <?php echo 'Before ' . Post::countTime($post->date);
+            if ($post->getLikes() > 0) {
+                echo $post->getLikes();
+                ?>
+                <a href="javascript:void(0);" data-open="likeModal">
+                    <?= ($post->getLikes() != 1) ? ' likes' : ' like'; ?>
+                </a>
+                <?php
+            }
             ?>
-            <a href="javascript:void(0);" data-open="likeModal">
-                <?= ($post->getLikes() != 1) ? ' likes' : ' like'; ?>
-            </a>
-            <?php
-        }
-        ?>
-    </cite>
-    <?php if (Session::getInstance()->isLoggedIn()): ?>
-        <a href="javascript:void(0);" class="comForm">Comment</a>
-        <form method="post" action="<?= App::config('url') ?>admin/comment/<?php echo $post->id ?>"
-              class="form-horizontal showActionComment">
-            <input type="text" name="content">
-        </form>
-    <?php endif;
-    foreach ($post->getComments() as $comment): ?>
-        <div class="indent">
-            <p>
-                <img src="/app/images/<?= $comment->image; ?>" class="postImage">
-                <b><?php echo htmlspecialchars($comment->user) ?></b>
-                <?= htmlspecialchars($comment->content) ?> </a> <br/>
-            </p>
-            <cite>
-                <?php echo 'Before ' . Post::countTime($comment->date) ?>
-            </cite>
-            <?php if (Session::getInstance()->isLoggedIn()): ?>
-                <a href="javascript:void(0);" class="comForm">Comment</a>
-                <form method="post" action="<?= App::config('url') ?>admin/commentComment/<?php echo $comment->id ?>"
-                      class="form-horizontal showActionComment">
-                    <input type="text" name="content">
-                </form>
-            <?php endif; ?>
-            <?php Comment::recursion($comment->id) ?>
-        </div>
-    <?php endforeach; ?>
-    </p>
+        </cite>
+        <?php if (Session::getInstance()->isLoggedIn()): ?>
+            <a href="javascript:void(0);" class="comForm">Comment</a>
+            <form method="post" action="<?= App::config('url') ?>admin/comment/<?php echo $post->id ?>"
+                  class="form-horizontal showActionComment">
+                <input type="text" name="content">
+            </form>
+        <?php endif;
+        foreach ($post->getComments() as $comment): ?>
+            <div class="indent">
+                <p>
+                    <img src="/app/images/<?= $comment->image; ?>" class="postImage">
+                    <b><?php echo htmlspecialchars($comment->user) ?></b>
+                    <?= htmlspecialchars($comment->content) ?> </a> <br/>
+                </p>
+                <cite>
+                    <?php echo 'Before ' . Post::countTime($comment->date) ?>
+                </cite>
+                <?php if (Session::getInstance()->isLoggedIn()): ?>
+                    <a href="javascript:void(0);" class="comForm">Comment</a>
+                    <form method="post"
+                          action="<?= App::config('url') ?>admin/commentComment/<?php echo $comment->id ?>"
+                          class="form-horizontal showActionComment">
+                        <input type="text" name="content">
+                    </form>
+                <?php endif; ?>
+                <?php Comment::recursion($comment->id) ?>
+            </div>
+        <?php endforeach; ?>
+        </p>
+    <?php endif; ?>
 <?php endforeach; ?>
 
 
 <div class="reveal" id="likeModal" data-reveal>
     <h3>People who liked this post</h3>
     <?php echo $message ?>
-    <!--    --><?php //foreach (Like::all($post->id) as $like): ?>
-    <!--        --><?php //echo $like->user ?>
-    <!---->
-    <!---->
-    <!--    --><?php //endforeach; ?>
+    <?php foreach (Like::all($post->id) as $like): ?>
+        <?php echo $like->user ?>
+
+    <?php endforeach; ?>
     <button class="close-button" data-close aria-label="Close modal" type="button">
         <span aria-hidden="true">&times;</span>
     </button>
