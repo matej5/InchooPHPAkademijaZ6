@@ -8,7 +8,8 @@ firstname varchar(50) not null,
 lastname varchar(50) not null,
 email varchar(100) not null,
 pass char(60) not null,
-image varchar (100) not null
+image varchar (100) not null,
+status int not null
 )engine=InnoDB;
 
 create unique index ix1 on user(email);
@@ -46,11 +47,11 @@ alter table likes add FOREIGN KEY (user) REFERENCES user(id);
 alter table likes add FOREIGN KEY (post) REFERENCES post(id);
 
 
-insert into user (id,firstname,lastname,email,pass,image) values
-(null,'Tomislav','Jakopec','tjakopec@gmail.com','$2y$10$LFXuW6y.P0Zd81fwd..CK.pCd6ZcoT5DsY7rqet9jwzReaoRi7yua', 'avatar.jpg');
+insert into user (id,firstname,lastname,email,pass,image, status) values
+(null,'Tomislav','Jakopec','tjakopec@gmail.com','$2y$10$LFXuW6y.P0Zd81fwd..CK.pCd6ZcoT5DsY7rqet9jwzReaoRi7yua', 'avatar.jpg', 1);
 
 insert into user (firstname,lastname,email,pass,image) values
-('Mara','Jakopec','mjakopec@gmail.com','$2y$10$LFXuW6y.P0Zd81fwd..CK.pCd6ZcoT5DsY7rqet9jwzReaoRi7yua','avatar.jpg');
+('Mara','Jakopec','mjakopec@gmail.com','$2y$10$LFXuW6y.P0Zd81fwd..CK.pCd6ZcoT5DsY7rqet9jwzReaoRi7yua','avatar.jpg', 2);
 
 
 insert into post (content,user) values ('Evo danas pada kiša opet :(',1), ('Jedem jagode.',2);

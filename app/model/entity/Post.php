@@ -16,11 +16,9 @@ class Post
 
     private $userid;
 
-    private $userEmail;
+    private $image;
 
-    private $userImage;
-
-    public function __construct($id, $content, $user, $date, $likes, $comments, $userid, $userEmail, $userImage)
+    public function __construct($id, $content, $user, $date, $likes, $comments, $userid, $image)
     {
         $this->setId($id);
         $this->setContent($content);
@@ -32,8 +30,7 @@ class Post
         $this->setLikes($likes);
         $this->setComments($comments);
         $this->setUserid($userid);
-        $this->setUserEmail($userEmail);
-        $this->setUserImage($userImage);
+        $this->setImage($image);
     }
 
     public function __set($name, $value)
@@ -65,7 +62,7 @@ class Post
         $db = Db::connect();
         $statement = $db->prepare("select 
         a.id, a.content, concat(b.firstname, ' ', b.lastname) as user, a.date, 
-        count(c.id) as likes, b.email, b.image
+        count(c.id) as likes, concat(b.email, '/', b.image) as image
         from 
         post a inner join user b on a.user=b.id 
         left join likes c on a.id=c.post 
@@ -75,21 +72,18 @@ class Post
         $statement->execute();
         foreach ($statement->fetchAll() as $post) {
 
-            $statement = $db->prepare("select a.id, a.content, concat(b.firstname, ' ', b.lastname) as user, a.date from comment a inner join user b on a.user=b.id where a.postId=:id ");
+            $statement = $db->prepare("select a.id, a.content, concat(b.firstname, ' ', b.lastname) as user, concat(b.email, '/', b.image) as image, a.date from comment a inner join user b on a.user=b.id where a.postId=:id and a.commentId is null ");
             $statement->bindValue('id', $post->id);
             $statement->execute();
             $comments = $statement->fetchAll();
 
-            $list[] = new Post($post->id, $post->content, $post->user, $post->date, $post->likes, $comments, 0, $post->email, $post->image);
+            $list[] = new Post($post->id, $post->content, $post->user, $post->date, $post->likes, $comments, 0, $post->image);
         }
 
         return $list;
     }
 
-    /**
-     * @param $str
-     * @return string|string[]|null
-     */
+    //todo change hashtags
     public static function convertHashtags($str)
     {
         $replace = "/#+[a-zAZ0-9]+/";
@@ -106,7 +100,7 @@ class Post
         $statement = $db->prepare("select 
         a.id, a.content, concat(b.firstname, ' ', b.lastname) as user, a.date,
         d.id as commentid, d.content as commentcontent ,
-        concat(e.firstname, ' ', e.lastname) as commentuser,
+        concat(e.firstname, ' ', e.lastname) as commentuser, b.image, b.email
         count(c.id) as likes
         from 
         post a inner join user b on a.user=b.id 
@@ -121,7 +115,7 @@ class Post
         $statement->execute();
 
         foreach ($statement->fetchAll() as $post) {
-            $list[] = new Post($post->id, $post->content, $post->user, $post->date, $post->likes, [], 0);
+            $list[] = new Post($post->id, $post->content, $post->user, $post->date, $post->likes, [], 0, $post->email, $post->image);
         }
         $time2 = microtime(true);
         echo $time2 - $time;
@@ -134,7 +128,7 @@ class Post
         $id = intval($id);
         $db = Db::connect();
         $statement = $db->prepare("select 
-        a.id, a.content, concat(b.firstname, ' ', b.lastname) as user, a.date, a.user as userid, count(c.id) as likes
+        a.id, a.content, concat(b.firstname, ' ', b.lastname) as user, a.date, a.user as userid, count(c.id) as likes, b.image, b.email
         from 
         post a inner join user b on a.user=b.id 
         left join likes c on a.id=c.post 
@@ -143,15 +137,15 @@ class Post
         $statement->execute();
         $post = $statement->fetch();
 
-        $statement = $db->prepare("select a.id, a.content, concat(b.firstname, ' ', b.lastname) as user, a.date from comment a inner join user b on a.user=b.id where a.postId=:id ");
+        $statement = $db->prepare("select a.id, a.content, concat(b.firstname, ' ', b.lastname) as user, a.date from comment a inner join user b on a.user=b.id where a.postId=:id and a.commentId is null");
         $statement->bindValue('id', $id);
         $statement->execute();
         $comments = $statement->fetchAll();
 
 
-        $post->content = Post::convertHashtags($post->content);
+        //$post->content = Post::convertHashtags($post->content);
 
-        return new Post($post->id, $post->content, $post->user, $post->date, $post->likes, $comments, $post->userid);
+        return new Post($post->id, $post->content, $post->user, $post->date, $post->likes, $comments, $post->userid, $post->email, $post->image);
     }
 
     public static function countTime($date)

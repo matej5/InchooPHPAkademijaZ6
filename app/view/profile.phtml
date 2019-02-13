@@ -1,0 +1,48 @@
+<?php if (!Session::getInstance()->isLoggedIn()) {
+    header('Location: ' . App::config('url') . 'Index/index');
+} ?>
+
+<h2>Change options:</h2>
+
+<form method="post" action="<?php echo App::config('url') ?>admin/changeData">
+
+    <div class="form-group">
+        <div class="grid-x grid-padding-x">
+            <div class="small-3 cell">
+                <label for="middle-label" class="text-right middle">First name</label>
+            </div>
+            <div class="small-9 cell">
+                <input type="text" name="firstname" id="middle-label" value="<?= $user->getFirstname(); ?>">
+            </div>
+        </div>
+
+        <div class="grid-x grid-padding-x">
+            <div class="small-3 cell">
+                <label for="middle-label" class="text-right middle">Last name</label>
+            </div>
+            <div class="small-9 cell">
+                <input type="text" name="lastname" id="middle-label" value="<?= $user->getLastname(); ?>">
+            </div>
+        </div>
+
+        <div class="grid-x grid-padding-x">
+            <div class="small-3 cell">
+                <label for="middle-label" class="text-right middle">Email</label>
+            </div>
+            <div class="small-9 cell">
+                <input type="email" name="email" id="middle-label" value="<?= $user->getEmail(); ?>">
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" class="button primary">Change</button>
+
+</form>
+
+
+<img src="/app/images/<?= $user->getEmail() . '/' . $user->getImage() ?>" class="profileImage">
+<form action="<?php echo App::config('url') ?>admin/uploadImage" method="post" enctype="multipart/form-data">
+    Select image to upload:
+    <input type="file" name="fileToUpload" id="fileToUpload">
+    <input type="submit" value="Upload Image" name="submit">
+</form>

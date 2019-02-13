@@ -40,9 +40,10 @@ class Like
         return $this;
     }
 
-    public static function likes($post)
+    public static function all($post)
     {
         $db = Db::connect();
+        $list = [];
         $statement = $db->prepare("select * from likes where post = :post");
         $statement->bindValue('post', $post);
         $statement->execute();
@@ -50,5 +51,7 @@ class Like
         foreach ($statement->fetchAll() as $like) {
             $list[] = new Like($like->id, $like->user);
         }
+
+        return $list;
     }
 }

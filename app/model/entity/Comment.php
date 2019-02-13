@@ -8,8 +8,9 @@ class Comment
     private $postId;
     private $commentId;
     private $date;
+    private $image;
 
-    public function __construct($id, $user, $content, $post, $comment, $date)
+    public function __construct($id, $user, $content, $post, $comment, $date, $image)
     {
         $this->setId($id);
         $this->setUser($user);
@@ -20,6 +21,7 @@ class Comment
         date_timezone_set($d, timezone_open('Europe/Zagreb'));
         $d = date_format($d, 'd.m.Y. H:i');
         $this->setDate($d);
+        $this->setImage($image);
     }
 
     public function __set($name, $value)
@@ -49,15 +51,15 @@ class Comment
         $list = [];
         $id = intval($id);
         $db = Db::connect();
-        $statement = $db->prepare("SELECT a.*, concat(b.firstname, ' ', b.lastname) as user
+        $statement = $db->prepare("SELECT a.*, concat(b.firstname, ' ', b.lastname) as user, concat(b.email, '/', b.image) as image
         from comment a inner join user b on a.user = b.id
-        where postId = :id and comment = 0
+        where a.postId = :id and a.commentId <=> NULL
         group by a.id, a.content, concat(b.firstname, ' ', b.lastname), a.date 
         order by a.date desc;");
         $statement->bindValue('id', $id);
         $statement->execute();
         foreach ($statement->fetchAll() as $comment) {
-            $list[] = new Comment($comment->id, $comment->user, $comment->content, $comment->postId, $comment->commentId, $comment->date);
+            $list[] = new Comment($comment->id, $comment->user, $comment->content, $comment->postId, $comment->commentId, $comment->date, $comment->image);
         }
         return $list;
     }
@@ -78,7 +80,7 @@ class Comment
         $list = [];
         $id = intval($id);
         $db = Db::connect();
-        $statement = $db->prepare("SELECT a.*, concat(b.firstname, ' ', b.lastname) as user
+        $statement = $db->prepare("SELECT a.*, concat(b.firstname, ' ', b.lastname) as user, concat(b.email, '/', b.image) as image
         from comment a inner join user b on a.user = b.id
         where commentId = :id
         group by a.id, a.content, concat(b.firstname, ' ', b.lastname), a.date 
@@ -86,7 +88,7 @@ class Comment
         $statement->bindValue('id', $id);
         $statement->execute();
         foreach ($statement->fetchAll() as $comment) {
-            $list[] = new Comment($comment->id, $comment->user, $comment->content, $comment->postId, $comment->commentId, $comment->date);
+            $list[] = new Comment($comment->id, $comment->user, $comment->content, $comment->postId, $comment->commentId, $comment->date, $comment->image);
         }
         return $list;
     }
@@ -94,25 +96,28 @@ class Comment
     public static function recursion($id)
     {
         if ($comments = self::comOfCom($id)):
-            foreach ($comments as $comment):
-                ?>
+            foreach ($comments as $comment): ?>
                 <div class="indent">
                     <p>
-                        <cite><?= htmlspecialchars($comment->getUser()) ?></cite>
-                        <?php echo $comment->getDate() ?><br/>
-                        <?php echo $comment->getContent() ?>
+                        <img src="/app/images/<?= $comment->image; ?>" class="postImage">
+                        <b><?php echo htmlspecialchars($comment->user) ?></b>
+                        <?= htmlspecialchars($comment->content) ?> </a> <br/>
                     </p>
+                    <cite>
+                        <?php echo 'Before ' . Post::countTime($comment->date) ?>
+                    </cite>
                     <?php if (Session::getInstance()->isLoggedIn()): ?>
                         <a href="javascript:void(0);" class="comForm">Comment</a>
-                        <form method="post" action="<?= App::config('url') ?>admin/commentComment/<?php echo $comment->id ?>"
+                        <form method="post"
+                              action="<?= App::config('url') ?>admin/commentComment/<?php echo $comment->id ?>"
                               class="form-horizontal showActionComment">
                             <input type="text" name="content">
                         </form>
                     <?php endif; ?>
-                    <?php self::recursion($comment->id)?>
+                    <?php Comment::recursion($comment->id) ?>
                 </div>
-            <?php
-            endforeach;
-        endif;
+            <?php endforeach; ?>
+            </p>
+        <?php endif;
     }
 }

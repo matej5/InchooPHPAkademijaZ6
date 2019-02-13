@@ -16,6 +16,7 @@
 
 .indent{
     margin-left: 20px;
+    border-left: 2px dotted gray;
 }
 
 .form-horizontal{
@@ -36,4 +37,9 @@ a:hover{
     height: 40px;
     width: 40px;
     border-radius: 50%;
+}
+
+.profileImage{
+    height: 200px;
+    width: auto;
 }

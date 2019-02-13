@@ -5,15 +5,16 @@ class AdminController
     public function register()
     {
         $db = Db::connect();
-        $statement = $db->prepare("insert into user (firstname,lastname,email,pass,image) values (:firstname,:lastname,:email,:pass,:image)");
+        $statement = $db->prepare("insert into user (firstname,lastname,email,pass,image, status) values (:firstname,:lastname,:email,:pass,:image,:status)");
         $statement->bindValue('firstname', Request::post("firstname"));
         $statement->bindValue('lastname', Request::post("lastname"));
         $statement->bindValue('email', Request::post("email"));
-        $statement->bindValue('image', Request::post("image"));
+        $statement->bindValue('image', 'avatar.jpeg');
+        $statement->bindValue('status', 2);
         $statement->bindValue('pass', password_hash(Request::post("pass"), PASSWORD_DEFAULT));
         $statement->execute();
 
-        User::createAvatar(Request::post('firstname'),Request::post('lastname'),Request::post('email'));
+        User::createAvatar(Request::post('firstname'), Request::post('lastname'), Request::post('email'));
 
         Session::getInstance()->logout();
         $this->index();
@@ -25,7 +26,9 @@ class AdminController
 
         $db = Db::connect();
         $db->beginTransaction();
-        $statement = $db->prepare("delete from comment where postId=:post");
+        $statement = $db->prepare("SET foreign_key_checks = 0;
+                                            delete from comment where postId=:post;
+                                            SET foreign_key_checks = 1;");
         $statement->bindValue('post', $post);
         $statement->execute();
 
@@ -42,6 +45,45 @@ class AdminController
 
         $this->index();
 
+    }
+
+    public function profile()
+    {
+        $user = User::getData();
+        $view = new View();
+        $view->render('profile', [
+            "user" => $user,
+            "message" => ''
+        ]);
+    }
+
+    public function changeData()
+    {
+        $db = Db::connect();
+        $statement = $db->prepare("update user set firstname = :firstname, lastname = :lastname, email = :email where id = :id");
+        $statement->bindValue('id', Session::getInstance()->getUser()->id);
+        $statement->bindValue('firstname', Request::post("firstname"));
+        $statement->bindValue('lastname', Request::post("lastname"));
+        $statement->bindValue('email', Request::post("email"));
+        $statement->execute();
+
+        $this->profile();
+    }
+
+    public function uploadImage()
+    {
+        $target_dir = "app/images/".Session::getInstance()->getUser()->email."/";
+        $name = basename($_FILES["fileToUpload"]["name"]);
+        $target_file = $target_dir . $name;
+        if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
+            $db = Db::connect();
+            $statement = $db->prepare("update user set image = :image where id = :id;");
+            $statement->bindValue('id', Session::getInstance()->getUser()->id);
+            $statement->bindValue('image', $name);
+            $statement->execute();
+        }
+
+        $this->profile();
     }
 
     public function comment($postId)
@@ -61,24 +103,30 @@ class AdminController
         ]);
     }
 
-
     public function commentComment($commentId)
     {
         $db = Db::connect();
-        $statement = $db->prepare("insert into comment (commentId, user, content) values (:commentId,:user,:content)");
+        $statement = $db->prepare("select postId from comment where id = :commentId");
+        $statement->bindValue('commentId', $commentId);
+        $statement->execute();
+        $post = $statement->fetch()->postId;
+
+        $db = Db::connect();
+        $statement = $db->prepare("insert into comment (postId, commentId, user, content) values (:postId, :commentId,:user,:content)");
+        $statement->bindValue('postId', $post);
         $statement->bindValue('commentId', $commentId);
         $statement->bindValue('user', Session::getInstance()->getUser()->id);
         $statement->bindValue('content', Request::post("content"));
         $statement->execute();
 
-        $this->index();
+        header('Location: '.App::config('url').'Index/index');
     }
 
     public function like($post)
     {
-        if(Post::checkIfLiked($post)){
+        if (Post::checkIfLiked($post)) {
             $this->index();
-        }else {
+        } else {
             $db = Db::connect();
             $statement = $db->prepare("insert into likes (post,user) values (:post,:user)");
             $statement->bindValue('post', $post);
@@ -91,10 +139,10 @@ class AdminController
 
     public function authorize()
     {
-        if(!empty(Request::post("email")) && !empty(Request::post("password"))) {
+        if (!empty(Request::post("email")) && !empty(Request::post("password"))) {
 
             $db = Db::connect();
-            $statement = $db->prepare("select id, concat(firstname, ' ', lastname) as name, pass, image from user where email=:email");
+            $statement = $db->prepare("select id, concat(firstname, ' ', lastname) as name, pass, image, email, status from user where email=:email");
             $statement->bindValue('email', Request::post("email"));
             $statement->execute();
 
@@ -155,23 +203,5 @@ class AdminController
             "posts" => $posts,
             "message" => ''
         ]);
-    }
-
-    function bulkinsert()
-    {
-        $db = Db::connect();
-        for ($i = 0; $i < 20; $i++) {
-
-            $statement = $db->prepare("insert into post (content,user) values ('DDDD $i',1)");
-            $statement->execute();
-
-            $id = $db->lastInsertId();
-
-            for ($j = 0; $j < 20; $j++) {
-
-                $statement = $db->prepare("insert into comment (content,user,post) values ('CCCCC $i',1,$id)");
-                $statement->execute();
-            }
-        }
     }
 }

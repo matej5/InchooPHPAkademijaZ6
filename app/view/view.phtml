@@ -1,6 +1,5 @@
-<?php if( Session::getInstance()->isLoggedIn() &&
-    $post->getUserid()==Session::getInstance()->getUser()->id): ?>
-<a href="<?php echo App::config("url") ?>admin/delete/<?php echo $post->getId() ?>">Delete posts (and all likes and comments</a><br />
+<?php if( Session::getInstance()->isLoggedIn() && ($post->getUserid()==Session::getInstance()->getUser()->id) || Session::getInstance()->getUser()->status == 1): ?>
+<a href="<?php echo App::config("url") ?>admin/delete/<?php echo $post->getId() ?>">Delete posts (and all likes and comments)</a><br />
 <?php endif; ?>
 
 <cite><?= htmlspecialchars($post->getUser()) ?></cite>  <?php echo $post->date ?>
@@ -25,6 +24,7 @@
 <?php foreach ($post->getComments() as $comment): ?>
     <div class="indent">
         <p>
+            <img src="/app/images/<?= $comment->image; ?>" class="postImage">
             <cite><?= htmlspecialchars($comment->user) ?></cite>
             <?php echo $comment->date ?><br/>
             <?php echo $comment->content ?>
