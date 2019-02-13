@@ -1,14 +1,14 @@
 <h1>All Posts</h1>
 <?php if (Session::getInstance()->isLoggedIn()): ?>
     <h3>What's on your mind?</h3>
-    <form method="post" name="add_name" id="add_name" action="<?php echo App::config('url') ?>Index/newPost">
+    <form method="post" action="<?php echo App::config('url') ?>Index/newPost">
         <table class="table table-bordered" id="dynamic_field">
             <tr>
                 <td><input type="text" placeholder="Insert post" class="form-control name_list" id="content" name="content"></td>
                 <td><input type="text" placeholder="Insert tags separated by space" class="form-control name_list" id="tags" name="tags"></td>
             </tr>
         </table>
-        <input type="button" name="submit" id="submit" value="Save" class="button secondary">
+        <input type="submit" name="submit" id="submit" value="Save" class="button secondary">
     </form>
 <?php endif; ?>
 

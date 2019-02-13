@@ -12,6 +12,16 @@ class IndexController
         ]);
     }
 
+    public function byTag($tag)
+    {
+        $view = new View();
+        $posts = Post::byTag($tag);
+        $view->render('index', [
+            "posts" => $posts,
+            "message" => ''
+        ]);
+    }
+
     public function view($id = 0)
     {
         $view = new View();
@@ -28,22 +38,42 @@ class IndexController
 
         if ($data === false) {
             header('Location: ' . App::config('url'));
-        } else {
-            $connection = Db::connect();
-            $sql = 'INSERT INTO post (content,user) VALUES (:content,:user)';
-            $stmt = $connection->prepare($sql);
-            $stmt->bindValue('content', $data['content']);
-            $stmt->bindValue('user', Session::getInstance()->getUser()->id);
-            $stmt->execute();
-            header('Location: ' . App::config('url'));
         }
+
+        $connection = Db::connect();
+        $sql = "insert into post(content, user) values (:content, :user)";
+        $stmt = $connection->prepare($sql);
+        $stmt->bindValue('content', $data['content']);
+        $stmt->bindValue('user', Session::getInstance()->getUser()->id);
+        $stmt->execute();
+        $postId = $connection->lastInsertId();
+
+        if (!empty($data['tags'])) {
+            $d = explode(' ', $data['tags']);
+            foreach ($d as $rez) {
+                $sql = "Insert into tag (content) values (:tag)";
+                $stmt = $connection->prepare($sql);
+                $stmt->bindValue('tag', $rez);
+                $stmt->execute();
+                $tagId = $connection->lastInsertId();
+
+                $sql = "insert into post_tag(post, tag) values (:post,:tag)";
+                $stmt = $connection->prepare($sql);
+                $stmt->bindValue('post', $postId);
+                $stmt->bindValue('tag', $tagId);
+                $stmt->execute();
+            }
+        }
+        header('Location: ' . App::config('url'));
     }
+
 
     /**
      * @param $data
      * @return array|bool
      */
-    private function _validate($data)
+    private
+    function _validate($data)
     {
         $required = ['content'];
 

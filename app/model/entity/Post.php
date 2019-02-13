@@ -105,6 +105,31 @@ class Post
         return new Post($post->id, $post->content, $post->user, $post->date, $post->likes, $comments, $post->userid, $post->image);
     }
 
+
+    public static function bzTag($tag)
+    {
+        $id = intval($id);
+        $db = Db::connect();
+        $statement = $db->prepare("select 
+        a.id, a.content, concat(b.firstname, ' ', b.lastname) as user, a.date, a.user as userid, count(c.id) as likes, concat(b.email,'/', b.image) as image,
+        
+        from 
+        post a inner join user b on a.user=b.id 
+        left join likes c on a.id=c.post 
+        inner join tag d on 
+         where d.content=:tag");
+        $statement->bindValue('tag', $tag);
+        $statement->execute();
+        $post = $statement->fetch();
+
+        $statement = $db->prepare("select a.id, a.content, concat(b.firstname, ' ', b.lastname) as user, concat(b.email,'/', b.image) as image, a.date from comment a inner join user b on a.user=b.id where a.postId=:id and a.commentId is null");
+        $statement->bindValue('id', $id);
+        $statement->execute();
+        $comments = $statement->fetchAll();
+
+        return new Post($post->id, $post->content, $post->user, $post->date, $post->likes, $comments, $post->userid, $post->image);
+    }
+
     public static function countTime($date)
     {
         $time = strtotime($date);
