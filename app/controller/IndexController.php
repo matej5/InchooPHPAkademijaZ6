@@ -12,10 +12,10 @@ class IndexController
         ]);
     }
 
-    public function byTag($tag)
+    public function byTag()
     {
         $view = new View();
-        $posts = Post::byTag($tag);
+        $posts = Post::byTag($_POST['tag']);
         $view->render('index', [
             "posts" => $posts,
             "message" => ''

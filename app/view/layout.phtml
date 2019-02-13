@@ -25,15 +25,12 @@
         </ul>
     </div>
     <div class="top-bar-right">
-        <ul class="menu">
             <?php if (Session::getInstance()->isLoggedIn()): ?>
                 <a href="<?php echo App::config("url") . "admin/logout" ?>">Logout</a>
             <?php endif; ?>
-            <li><input type="search" placeholder="Search"></li>
-            <li>
-                <button type="button" class="button">Search</button>
-            </li>
-        </ul>
+        <form method="post" action="<?= App::config('url')?>Index/byTag">
+            <input type="text" name="tag" placeholder="Search by tag...">
+        </form>
     </div>
 </div>
 
