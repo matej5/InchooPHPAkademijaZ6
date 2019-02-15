@@ -169,7 +169,6 @@ class User
 
     public static function getData()
     {
-
         $db = Db::connect();
         $statement = $db->prepare("select * from user where id = :id");
         $statement->bindValue('id', Session::getInstance()->getUser()->id);

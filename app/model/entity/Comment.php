@@ -1,6 +1,6 @@
 <?php
 
-class Comment
+class Comment implements JsonSerializable
 {
     private $id;
     private $user;
@@ -10,12 +10,12 @@ class Comment
     private $date;
     private $image;
 
-    public function __construct($id, $user, $content, $post, $comment, $date, $image)
+    public function __construct($id, $user, $content, $postId, $comment, $date, $image)
     {
         $this->setId($id);
         $this->setUser($user);
         $this->setContent($content);
-        $this->setPost($post);
+        $this->setPostid($postId);
         $this->setComment($comment);
         $d = date_create($date);
         date_timezone_set($d, timezone_open('Europe/Zagreb'));
@@ -44,6 +44,20 @@ class Comment
             return $this->__get(strtolower(substr($name, 3)));
         }
         return $this;
+    }
+
+    public function jsonSerialize()
+    {
+        return
+            [
+                'id'   => $this->getId(),
+                'content' => $this->getContent(),
+                'user' => $this->getUser(),
+                'date'   => $this->getDate(),
+                'commentid' => $this->getCommentid(),
+                'postid'   => $this->getPostid(),
+                'image' => $this->getImage(),
+            ];
     }
 
     public static function all($id)

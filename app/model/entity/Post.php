@@ -1,6 +1,6 @@
 <?php
 
-class Post
+class Post implements JsonSerializable
 {
     private $id;
 
@@ -56,7 +56,22 @@ class Post
         return $this;
     }
 
-    public static function all()
+    public function jsonSerialize()
+    {
+        return
+            [
+                'id'   => $this->getId(),
+                'content' => $this->getContent(),
+                'user' => $this->getUser(),
+                'date'   => $this->getDate(),
+                'likes' => $this->getLikes(),
+                'comments' => $this->getComments(),
+                'userId'   => $this->getUserid(),
+                'image' => $this->getImage(),
+            ];
+    }
+
+    public static function all($page = 1)
     {
         $list = [];
         $db = Db::connect();
@@ -68,7 +83,9 @@ class Post
         left join likes c on a.id=c.post 
         where a.date > ADDDATE(now(), INTERVAL -7 DAY) 
         group by a.id, a.content, concat(b.firstname, ' ', b.lastname), a.date 
-        order by a.date desc limit 10");
+        order by a.date desc limit :start, :ammount");
+        $statement->bindValue('start', ($page - 1) * 10, PDO::PARAM_INT);
+        $statement->bindValue('ammount', 10, PDO::PARAM_INT);
         $statement->execute();
         foreach ($statement->fetchAll() as $post) {
 
@@ -81,6 +98,16 @@ class Post
         }
 
         return $list;
+    }
+
+    public static function count()
+    {
+        $db = Db::connect();
+        $statement = $db->prepare("select count(*) as total from post");
+        $statement->execute();
+        $num = $statement->fetch();
+
+        return (int)$num->total;
     }
 
     public static function find($id)
@@ -105,10 +132,23 @@ class Post
         return new Post($post->id, $post->content, $post->user, $post->date, $post->likes, $comments, $post->userid, $post->image);
     }
 
+    public function getTags()
+    {
+        $list = [];
+        $db = Db::connect();
+        $statement = $db->prepare("select a.content as cont from tag a inner join post_tag b on a.id = b.tag where b.post = :post");
+        $statement->bindValue('post', $this->id);
+        $statement->execute();
+        foreach ($statement->fetchAll() as $tag) {
+            $list[] = $tag->cont;
+        }
+
+        return $list;
+    }
 
     public static function byTag($tag)
     {
-        if(!empty($tag)) {
+        if (!empty($tag)) {
             $list = [];
             $db = Db::connect();
             $statement = $db->prepare("select 
@@ -122,7 +162,7 @@ class Post
             where a.date > ADDDATE(now(), INTERVAL -7 DAY) and e.content = :tag
             group by d.id , a.id, a.content, concat(b.firstname, ' ', b.lastname), a.date
             order by a.date desc limit 10");
-            $statement->bindValue('tag',$tag);
+            $statement->bindValue('tag', $tag);
             $statement->execute();
             foreach ($statement->fetchAll() as $post) {
 
@@ -135,7 +175,7 @@ class Post
             }
 
             return $list;
-        }else{
+        } else {
             return self::all();
         }
     }
@@ -175,9 +215,9 @@ class Post
         $statement->bindValue('user', Session::getInstance()->getUser()->id);
         $statement->execute();
 
-        if($statement->rowCount() > 0){
+        if ($statement->rowCount() > 0) {
             return true;
-        }else {
+        } else {
             return false;
         }
     }

@@ -9,11 +9,8 @@ endif; ?>
     <b><?php echo htmlspecialchars($post->getUser()) ?></b>
     <h3><?= htmlspecialchars($post->getContent()) ?> </h3> <br/>
 <?php if (Session::getInstance()->isLoggedIn()): ?>
-    <a href="<?php echo App::config('url') ?>admin/like/<?php echo $post->id ?>">Like</a>
-
-    <form method="post" action="<?= App::config('url') ?>admin/report/<?php echo $post->id ?>">
-        <input type="submit" name="submit" value="Report">
-    </form>
+    <a class="button hollow success tiny" href="<?php echo App::config('url') ?>admin/like/<?php echo $post->id ?>">Like</a>
+    <a class="button hollow alert tiny" href="<?php echo App::config('url') ?>admin/report/<?php echo $post->id ?>">Report</a>
 <?php endif; ?>
     <cite>
         <?php echo 'Before ' . Post::countTime($post->date);
@@ -27,6 +24,11 @@ endif; ?>
         }
         ?>
     </cite>
+    <form method="post" action="<?= App::config('url')?>Index/byTag">
+        <?php foreach ($post->getTags() as $tag){ ?>
+            <input type="submit" name="tag" value="<?php echo $tag ?>">
+        <?php } ?>
+    </form>
     <hr>
 
     <h3>Comments</h3>
@@ -47,13 +49,16 @@ endif; ?>
     <div class="indent">
         <p>
             <img src="/app/images/<?= $comment->image; ?>" class="postImage">
-            <cite><?= htmlspecialchars($comment->user) ?></cite>
-            <?php echo $comment->date ?><br/>
-            <?php echo $comment->content ?>
+            <b><?php echo htmlspecialchars($comment->user) ?></b>
+            <?= htmlspecialchars($comment->content) ?> </a> <br/>
         </p>
+        <cite>
+            <?php echo 'Before ' . Post::countTime($comment->date) ?>
+        </cite>
         <?php if (Session::getInstance()->isLoggedIn()): ?>
             <a href="javascript:void(0);" class="comForm">Comment</a>
-            <form method="post" action="<?= App::config('url') ?>admin/commentComment/<?php echo $comment->id ?>"
+            <form method="post"
+                  action="<?= App::config('url') ?>admin/commentComment/<?php echo $comment->id ?>"
                   class="form-horizontal showActionComment">
                 <input type="text" name="content">
             </form>

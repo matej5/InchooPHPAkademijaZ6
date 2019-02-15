@@ -2,10 +2,10 @@
 
 class IndexController
 {
-    public function index()
+    public function index($page = 1)
     {
         $view = new View();
-        $posts = Post::all();
+        $posts = Post::all($page);
         $view->render('index', [
             "posts" => $posts,
             "message" => ''

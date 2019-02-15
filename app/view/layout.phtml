@@ -28,6 +28,8 @@
             <?php if (Session::getInstance()->isLoggedIn()): ?>
                 <a href="<?php echo App::config("url") . "admin/logout" ?>">Logout</a>
             <?php endif; ?>
+    </div>
+    <div class="top-bar-right">
         <form method="post" action="<?= App::config('url')?>Index/byTag">
             <input type="text" name="tag" placeholder="Search by tag...">
         </form>

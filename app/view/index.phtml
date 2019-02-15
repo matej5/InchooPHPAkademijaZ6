@@ -4,8 +4,10 @@
     <form method="post" action="<?php echo App::config('url') ?>Index/newPost">
         <table class="table table-bordered" id="dynamic_field">
             <tr>
-                <td><input type="text" placeholder="Insert post" class="form-control name_list" id="content" name="content"></td>
-                <td><input type="text" placeholder="Insert tags separated by space" class="form-control name_list" id="tags" name="tags"></td>
+                <td><input type="text" placeholder="Insert post" class="form-control name_list" id="content"
+                           name="content"></td>
+                <td><input type="text" placeholder="Insert tags separated by space" class="form-control name_list"
+                           id="tags" name="tags"></td>
             </tr>
         </table>
         <input type="submit" name="submit" id="submit" value="Save" class="button secondary">
@@ -22,11 +24,8 @@
             <?= htmlspecialchars($post->getContent()) ?> </a> <br/>
 
         <?php if (Session::getInstance()->isLoggedIn()): ?>
-            <a href="<?php echo App::config('url') ?>admin/like/<?php echo $post->id ?>">Like</a>
-
-            <form method="post" action="<?= App::config('url') ?>admin/report/<?php echo $post->id ?>">
-                <input type="submit" name="submit" value="Report">
-            </form>
+            <a class="button hollow success tiny" href="<?php echo App::config('url') ?>admin/like/<?php echo $post->id ?>">Like</a>
+            <a class="button hollow alert tiny" href="<?php echo App::config('url') ?>admin/report/<?php echo $post->id ?>">Report</a>
         <?php endif; ?>
         <cite>
             <?php echo 'Before ' . Post::countTime($post->date);
@@ -70,6 +69,7 @@
         <?php endforeach; ?>
         </p>
     <?php endif; ?>
+<hr>
 <?php endforeach; ?>
 
 <div class="reveal" id="likeModal" data-reveal>
@@ -83,3 +83,6 @@
         <span aria-hidden="true">&times;</span>
     </button>
 </div>
+<?php for ($i = 0; $i < (floor(Post::count() / 10)); $i++) {?>
+    <a class="button" href="<?php echo App::config('url') . 'Index/index/' . ($i+1) ?>"><?= $i+1 ?></a>
+<?php }?>

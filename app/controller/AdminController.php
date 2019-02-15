@@ -5,13 +5,13 @@ class AdminController
     public function register()
     {
         $db = Db::connect();
-        $statement = $db->prepare("insert into user (firstname,lastname,email,pass,image, status) values (:firstname,:lastname,:email,:pass,:image,:status)");
+        $statement = $db->prepare("insert into user (firstname,lastname,email,pass,image, status) values (:firstname,:lastname,:email,:password,:image,:status)");
         $statement->bindValue('firstname', Request::post("firstname"));
         $statement->bindValue('lastname', Request::post("lastname"));
         $statement->bindValue('email', Request::post("email"));
         $statement->bindValue('image', 'avatar.jpeg');
         $statement->bindValue('status', 2);
-        $statement->bindValue('pass', password_hash(Request::post("pass"), PASSWORD_DEFAULT));
+        $statement->bindValue('password', password_hash(Request::post("password"), PASSWORD_DEFAULT));
         $statement->execute();
 
         User::createAvatar(Request::post('firstname'), Request::post('lastname'), Request::post('email'));
@@ -76,19 +76,29 @@ class AdminController
 
     }
 
-    public function profile()
+    public function profile($msg = '')
     {
         $user = User::getData();
         $view = new View();
         $view->render('profile', [
             "user" => $user,
-            "message" => ''
+            "message" => $msg
         ]);
     }
 
     //todo change pass
     public function changeData()
     {
+        $msg = '';
+        if(Request::post('pass1') === Request::post('pass2')){
+            $db = Db::connect();
+            $statement = $db->prepare("update user set pass = :pass where id = :id");
+            $statement->bindValue('pass', password_hash(Request::post("pass1"), PASSWORD_DEFAULT));
+            $statement->bindValue('id', Session::getInstance()->getUser()->id);
+            $statement->execute();
+        }elseif (!empty(Request::post('pass1')) || !empty(Request::post('pass2'))){
+            $msg = 'Passwords need to match!';
+        }
         $db = Db::connect();
         $statement = $db->prepare("update user set firstname = :firstname, lastname = :lastname, email = :email where id = :id");
         $statement->bindValue('id', Session::getInstance()->getUser()->id);
@@ -97,7 +107,7 @@ class AdminController
         $statement->bindValue('email', Request::post("email"));
         $statement->execute();
 
-        $this->profile();
+        $this->profile($msg);
     }
 
     public function uploadImage()
@@ -226,9 +236,10 @@ class AdminController
 
     public function json()
     {
-        $posts = Post::all();
-        //print_r($posts);
-        echo json_encode($posts);
+        $posts = Post::all(2);
+        foreach ($posts as $post) {
+            echo json_encode($post);
+        }
     }
 
     public function index()

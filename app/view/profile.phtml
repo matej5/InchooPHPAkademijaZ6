@@ -4,6 +4,8 @@
 
 <h2>Change options:</h2>
 
+<?php echo $message ?>
+
 <form method="post" action="<?php echo App::config('url') ?>admin/changeData">
 
     <div class="form-group">
@@ -31,6 +33,24 @@
             </div>
             <div class="small-9 cell">
                 <input type="email" name="email" id="middle-label" value="<?= $user->getEmail(); ?>">
+            </div>
+        </div>
+
+        <div class="grid-x grid-padding-x">
+            <div class="small-3 cell">
+                <label for="middle-label" class="text-right middle">Password</label>
+            </div>
+            <div class="small-9 cell">
+                <input type="password" name="pass1" id="middle-label" value="">
+            </div>
+        </div>
+
+        <div class="grid-x grid-padding-x">
+            <div class="small-3 cell">
+                <label for="middle-label" class="text-right middle">Password</label>
+            </div>
+            <div class="small-9 cell">
+                <input type="password" name="pass2" id="middle-label" value="">
             </div>
         </div>
     </div>
